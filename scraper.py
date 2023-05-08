@@ -1,6 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
+import numpy as np
 import json
+import os
+from translate import Translator
 
 
 #product_code = input("Please enter the product code: ")
@@ -35,6 +38,11 @@ def get_element(dom, sel = None, attribute = None, return_list= False):
         return None
 
 
+def clear_text(text):
+    return ' '.join(text.replace(r"\s", " ").split())
+
+
+
 all_opinions = []
 
 selectors = {
@@ -53,12 +61,14 @@ selectors = {
 
 }
 
+from_lang = "pl"
+to_lang = "en"
+translator = Translator(to_lang, from_lang)
 
 
 while url:
     response = requests.get(url)
-    print("2222")
-    print(url)
+
     if response.status_code == requests.codes.ok:   
         page_dom = BeautifulSoup(response.text, "html.parser")
         opinions = page_dom.select("div.js_product-review")
@@ -91,9 +101,17 @@ while url:
                 single_opinion = {}
                 for key, value in selectors.items():
                     single_opinion[key] = get_element(opinion, *value)
-                    
-                single_opinion["recommendation"] = True if single_opinion["recommendation"] == "Polecam" else False if single_opinion["recommendation"] == "Nie polecam" else None
 
+                single_opinion["recommendation"] = True if single_opinion["recommendation"] == "Polecam" else False if single_opinion["recommendation"] == "Nie polecam" else None
+                single_opinion["score"] = np.divide(*[float(score.replace(",", ".")) for score in single_opinion["score"].split("/")])
+                single_opinion["like"] = int(single_opinion["like"])
+                single_opinion["dislike"] = int(single_opinion["dislike"])
+                single_opinion["description"] = clear_text(single_opinion["description"])
+                single_opinion["description_en"] = translator.translate(single_opinion["description"][0:500])
+                single_opinion["pros_en"] = translator.translate(single_opinion["pros"])
+                single_opinion["cons_en"] = translator.translate(single_opinion["cons"])
+
+                
 
                 all_opinions.append(single_opinion)
             
@@ -111,5 +129,7 @@ while url:
         url = None
 
 if len(all_opinions) > 0:
+    if not os.path.exists("./opinions"):
+        os.mkdir("./opinions")
     with open(f"./opinions/{product_code}.json", "w", encoding="UTF-8") as jf:
         json.dump(all_opinions,jf, indent=4, ensure_ascii=False)
