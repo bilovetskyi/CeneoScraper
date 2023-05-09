@@ -7,7 +7,7 @@ from translate import Translator
 
 
 #product_code = input("Please enter the product code: ")
-product_code = "129910940"
+product_code = "133748381"
 print(product_code)
 
 url = f"https://www.ceneo.pl/{product_code}#tab=reviews"
