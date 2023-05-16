@@ -36,6 +36,9 @@ plt.title("Recommendations")
 plt.savefig(f"./charts/{product_code}_pie.svg")
 plt.close()
 
+if not os.path.exists("./charts-bars"):
+    os.mkdir("./charts-bars")
+
 stars = opinions.stars.value_counts().reindex(list(np.arange(0,5.5,0.5)), fill_value=0)
 stars.plot.bar(color="lightskyblue")
 plt.ylim(0,max(stars)+10)
@@ -46,4 +49,5 @@ plt.xticks(rotation = 0)
 plt.grid(True, "major", "y")
 for index, value in enumerate(stars):
     plt.text(index, value+1.5, str(value), ha = "center")
-plt.show()
+plt.savefig(f"./charts-bars/{product_code}_bars.svg")
+plt.close()
