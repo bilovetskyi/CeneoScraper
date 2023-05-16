@@ -1,1 +1,9 @@
 # CeneoScraper
+1. Requests
+2. BeautifulSoup
+3. Json
+4. Os
+5. Translate
+6. Numpy
+7. Pandas
+8. Matplotlib
